@@ -18,7 +18,7 @@ SRC_DIRS = src src/%PLATFORM%
 # - a URL to a git repo
 # - empty which will use whatever is the latest
 # - undefined, no fujinet-lib will be used
-FUJINET_LIB = /put/your/lib-experimental/path/here/for/msx
+FUJINET_LIB = https://github.com/FozzTexx/fujinet-lib-experimental.git
 
 # Define extra dirs ("combos") that expand with a platform.
 # Format: platform+=combo1,combo2
@@ -29,7 +29,7 @@ PLATFORM_COMBOS = \
   msxdos+=msx \
   adam_cpm+=adam
 
-LDFLAGS += -m -create-app
+LDFLAGS_EXTRA_MSXROM += -m --generic-console -pragma-redirect:CRT_FONT=_font -create-app -lm 
 
 include mekkogx/toplevel-rules.mk
 
