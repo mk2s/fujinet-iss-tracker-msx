@@ -1,4 +1,4 @@
-PRODUCT = hello
+PRODUCT = iss
 PLATFORMS = coco apple2 atari c64 adam msdos msxrom adam_cpm
 
 # You can run 'make <platform>' to build for a specific platform,
@@ -29,7 +29,9 @@ PLATFORM_COMBOS = \
   msxdos+=msx \
   adam_cpm+=adam
 
-LDFLAGS_EXTRA_MSXROM += -m --generic-console -pragma-redirect:CRT_FONT=_font -create-app -lm 
+LDFLAGS_EXTRA_MSXROM += -m --generic-console -pragma-redirect:CRT_FONT=_font -create-app
+CFLAGS_EXTRA_MSXROM += -O0
+LIBS += -lm
 
 include mekkogx/toplevel-rules.mk
 
