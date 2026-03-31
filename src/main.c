@@ -6,6 +6,9 @@
 #include "fujinet-network.h"
 #include "map.h"
 
+// MSX tick counter.
+__at (0xFC9E) unsigned int tikcnt;
+
 char txt[80], url[128];
 #define CH_EOL 13
 
@@ -67,14 +70,14 @@ unsigned char fetch_latitude_to_y(char *latitude)
 {
   int lat = atoi(latitude)+180;
 
-  return ypos[lat];
+  return ypos[lat]+4;
 }
 
 unsigned char fetch_longitude_to_x(char *longitude)
 {
   int lon = atoi(longitude)+180;
 
-  return xpos[lon];
+  return xpos[lon]-4;
 }
 
 void main(void)
@@ -83,14 +86,17 @@ void main(void)
   char lat_str[16];
   char lon_str[16];
 
-    vdp_set_mode(2);
-    vdp_color(VDP_INK_LIGHT_GREEN,VDP_INK_DARK_BLUE,VDP_INK_DARK_BLUE);
-    vdp_vwrite(src_ISS_TIAP,0x0000,src_ISS_TIAP_len);
-    vdp_vwrite(src_ISS_TIAC,0x2000,src_ISS_TIAC_len);
+  vdp_set_mode(2);
+  vdp_color(VDP_INK_LIGHT_GREEN,VDP_INK_DARK_BLUE,VDP_INK_DARK_BLUE);
+  vdp_vwrite(src_ISS_TIAP,0x0000,src_ISS_TIAP_len);
+  vdp_vwrite(src_ISS_TIAC,0x2000,src_ISS_TIAC_len);
 
-    vdp_set_sprite_mode(sprite_scaled);
-    vdp_set_sprite_8(0,sprite);
+  vdp_set_sprite_mode(sprite_scaled);
+  vdp_set_sprite_8(0,sprite);
 
+  while(1){
+    gotoxy(0,21); 
+    cprintf("                           ");
     err = open_json("N:HTTP://api.open-notify.org/iss-now.json");
     if (!err) {
       /* SUCCESS */
@@ -103,13 +109,17 @@ void main(void)
       strncpy(lon_str, json_part, sizeof(lon_str) - 1);
       lon_str[sizeof(lon_str) - 1] = '\0';
 
-      parse_json("/timestamp");
+      //parse_json("/timestamp");
 
       err = network_close("N:HTTP://api.open-notify.org/iss-now.json"); // FIXME: Detect and deal with errors (moot?)
 
-      gotoxy(0,21); cprintf("lat:%s lon:%s", lat_str, lon_str);
+      gotoxy(0,21);
+      cprintf("lat:%s lon:%s", lat_str, lon_str);
       vdp_put_sprite_8(0,fetch_longitude_to_x(lon_str), fetch_latitude_to_y(lat_str),0, VDP_INK_DARK_RED);
-    }
 
-    while(1);
+    }
+    tikcnt = 0;
+    while(tikcnt<4096);
+    /* 4096 / 60 = 68.27 seconds*/
+  }
 }
